@@ -1,5 +1,6 @@
 const dotenv = require('dotenv');
 dotenv.config();
+const cors = require('cors');
 const express = require('express');
 const bodyParser = require('body-parser');
 const dishRoutes = require('./routes/dishRoutes');
@@ -9,7 +10,13 @@ require('./config/db');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+const corsOptions = {
+  origin: 'http://localhost:5173', 
+  credentials: true, 
+  allowedHeaders: ['Content-Type', 'Authorization'], 
+};
 
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use('/dishes',dishRoutes);
 app.use('/users',userRoutes);
