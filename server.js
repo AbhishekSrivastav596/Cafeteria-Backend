@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const dishRoutes = require('./routes/dishRoutes');
 const userRoutes = require('./routes/userRoutes');
 const counterRoutes = require('./routes/counterRoutes');
+const cartRoutes = require('./routes/cartRoutes');
 require('./config/db');
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -21,6 +22,7 @@ app.use(bodyParser.json());
 app.use('/dishes',dishRoutes);
 app.use('/users',userRoutes);
 app.use('/counters',counterRoutes);
+app.use('/cart',cartRoutes);
 
 
 app.listen(PORT, () => {

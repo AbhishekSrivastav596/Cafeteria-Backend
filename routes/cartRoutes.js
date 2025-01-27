@@ -1,0 +1,112 @@
+const express = require('express');
+const router = express.Router();
+const User = require('../models/user');
+const userId = '67939eb3d220c80478105ee1'; 
+
+router.use(auth);
+
+
+router.get('/', async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    const cart = req.user.cart; 
+    res.status(200).json({ cart });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch cart', error });
+  }
+});
+
+router.post('/add', async (req, res) => {
+  const { dishId, quantity } = req.body;
+
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    const existingItem = req.user.cart.find((item) => item.dish.toString() === dishId);
+
+    if (existingItem) {
+      existingItem.quantity += quantity;
+    } else {
+      req.user.cart.push({ dish: dishId, quantity });
+    }
+
+    await req.user.save();
+    res.status(200).json({ message: 'Item added to cart', cart: req.user.cart });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to add item to cart', error });
+  }
+});
+
+router.delete('/remove', async (req, res) => {
+  const { dishId } = req.body;
+
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+    console.log(dishId)
+    req.user.cart = req.user.cart.filter((item) => item.dish._id.toString() !== dishId);
+
+    await req.user.save();
+    res.status(200).json({ message: 'Item removed from cart', cart: req.user.cart });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to remove item from cart', error });
+  }
+});
+
+router.patch('/:dishId', async (req, res) => {
+  const { changeQuantity } = req.body;
+
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    const item = req.user.cart.find(item => item.dish._id.toString() === req.params.dishId);
+
+    if (!item) {
+      return res.status(404).json({ message: 'Item not found in cart' });
+    }
+
+    item.quantity += changeQuantity; 
+    await req.user.save();
+    res.status(200).json(req.user.cart); 
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to update item quantity', error });
+  }
+});
+
+
+router.delete('/clear', async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    req.user.cart = [];
+    await req.user.save();
+    res.status(200).json({ message: 'Cart cleared successfully', cart: req.user.cart });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to clear cart', error });
+  }
+});
+
+
+async function auth(req, res, next) {
+  try {
+    req.user = await User.findById(userId).populate('cart.dish'); 
+    if (!req.user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+    next();
+  } catch (error) {
+    res.status(500).json({ message: 'Process failed', error });
+  }
+}
+
+module.exports = router;
