@@ -27,8 +27,8 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', async (req, res) => {
     try {
-        const { name, price, stock, description, counter } = req.body;
-        const newDish = new Dish({ name, price, stock, description, counter });
+        const { name, price, stock, description, counter, imageUrl } = req.body;
+        const newDish = new Dish({ name, price, stock, description, counter, imageUrl });
         await newDish.save();
         res.status(201).json({message:'New dish created successfully',newDish});
     } catch (error) {
