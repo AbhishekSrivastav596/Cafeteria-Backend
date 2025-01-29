@@ -13,7 +13,7 @@ router.get('/', async (req, res) => {
     }
 
     const cart = req.user.cart; 
-    res.status(200).json({ cart });
+    res.status(200).json({ message:'successfully fetched',cart:req.user.cart });
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch cart', error });
   }
@@ -27,7 +27,7 @@ router.post('/add', async (req, res) => {
       return res.status(401).json({ message: 'User not found' });
     }
 
-    const existingItem = req.user.cart.find((item) => item.dish.toString() === dishId);
+    const existingItem = req.user.cart.find((item) => item.dish._id.toString() === dishId);
 
     if (existingItem) {
       existingItem.quantity += quantity;
@@ -56,6 +56,7 @@ router.delete('/remove', async (req, res) => {
     res.status(200).json({ message: 'Item removed from cart', cart: req.user.cart });
   } catch (error) {
     res.status(500).json({ message: 'Failed to remove item from cart', error });
+    console.log(req.user.cart);
   }
 });
 
