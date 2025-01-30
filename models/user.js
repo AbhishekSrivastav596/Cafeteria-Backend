@@ -13,16 +13,16 @@ const userSchema = new mongoose.Schema({
     cart: { type: [cartItemSchema], default: [] },
 });
 
-userSchema.pre('save', async function (next) {
-    if (this.isModified('password')) {
-        this.password = await bcrypt.hash(this.password, 10); 
-    }
-    next();
-})
+// userSchema.pre('save', async function (next) {
+//     if (this.isModified('password')) {
+//         this.password = await bcrypt.hash(this.password, 10); 
+//     }
+//     next();
+// })
 
-userSchema.methods.comparePassword = async function (password) {
-    return bcrypt.compare(password, this.password);
-};
+// userSchema.methods.comparePassword = async function (password) {
+//     return bcrypt.compare(password, this.password);
+// };
 
 
 const User = mongoose.model('User', userSchema);

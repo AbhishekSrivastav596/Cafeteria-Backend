@@ -35,7 +35,7 @@ router.post('/add', async (req, res) => {
       req.user.cart.push({ dish: dishId, quantity });
     }
 
-    await req.user.save();
+    await req.user.save().then(u => u.populate('cart.dish'));
     res.status(200).json({ message: 'Item added to cart', cart: req.user.cart });
   } catch (error) {
     res.status(500).json({ message: 'Failed to add item to cart', error });
