@@ -40,6 +40,18 @@ router.get('/:counterId', async (req, res) => {
   }
 });
 
+router.get('/counter/:counterId', async (req, res) => {
+  try {
+      const dishes = await Dish.find({ counter: req.params.counterId }).populate('counter');
+      if (!dishes.length) {
+          return res.status(404).json({ message: 'No dishes found for this counter' });
+      }
+      res.status(200).json({ message: 'Fetched dishes successfully', dishes });
+  } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch dishes', error });
+  }
+});
+
 
 router.put('/:counterId', async (req, res) => {
   try {
