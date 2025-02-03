@@ -28,24 +28,24 @@ router.get('/', async (req, res) => {
 });
 
 
-router.get('/:id', async (req, res) => {
+router.get('/:counterId', async (req, res) => {
   try {
-    const counter = await Counter.findById(req.params.id).populate('merchants');
+    const counter = await Counter.findById(req.params.counterId).populate('merchants');
     if (!counter) {
       return res.status(404).json({ message: "Counter not found" });
     }
-    res.status(200).json(counter);
+    res.status(200).json({message:"Successfully fetched counter",counter});
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch counter", error: err });
   }
 });
 
 
-router.put('/:id', async (req, res) => {
+router.put('/:counterId', async (req, res) => {
   try {
     const { name, merchants } = req.body;
     const updatedCounter = await Counter.findByIdAndUpdate(
-      req.params.id,
+      req.params.counterId,
       { name, merchants },
       { new: true }
     ).populate('merchants');
@@ -103,9 +103,9 @@ router.delete('/:counterId/merchant/:merchantId', async (req, res) => {
 });
 
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:counterId', async (req, res) => {
   try {
-    const counter = await Counter.findByIdAndDelete(req.params.id);
+    const counter = await Counter.findByIdAndDelete(req.params.counterId);
 
     if (!counter) {
       return res.status(404).json({ message: "Counter not found" });
