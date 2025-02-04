@@ -7,8 +7,8 @@ const User = require('../models/user');
 
 router.post('/', async (req, res) => {
   try {
-    const { name, merchants } = req.body;
-    const newCounter = new Counter({ name, merchants });
+    const { name, merchants, imageUrl, description } = req.body;
+    const newCounter = new Counter({ name, merchants, imageUrl, description });
     await newCounter.save();
     res.status(201).json({ message: "Counter created", counter: newCounter });
   } catch (err) {
@@ -44,10 +44,10 @@ router.get('/:counterId', async (req, res) => {
 
 router.put('/:counterId', async (req, res) => {
   try {
-    const { name, merchants } = req.body;
+    const { name, merchants, imageUrl, description } = req.body;
     const updatedCounter = await Counter.findByIdAndUpdate(
       req.params.counterId,
-      { name, merchants },
+      { name, merchants, imageUrl, description},
       { new: true }
     ).populate('merchants');
 
