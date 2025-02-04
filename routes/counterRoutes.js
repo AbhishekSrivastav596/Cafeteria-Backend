@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Counter = require('../models/counter');
 const User = require('../models/user');
+const Dish = require('../models/dish');
 
 
 
@@ -107,7 +108,7 @@ router.delete('/:counterId/merchant/:merchantId', async (req, res) => {
 router.delete('/:counterId', async (req, res) => {
   try {
     const counter = await Counter.findByIdAndDelete(req.params.counterId);
-
+    await Dish.deleteMany({ counter: req.params.counterId });
     if (!counter) {
       return res.status(404).json({ message: "Counter not found" });
     }
