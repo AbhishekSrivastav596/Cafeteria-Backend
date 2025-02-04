@@ -6,7 +6,7 @@ const dishSchema = new mongoose.Schema({
   stock: { type: Boolean, default: true, required: true },
   description: { type: String, required: true }, 
   imageUrl : { type: String },
-  counter: { type: mongoose.Schema.Types.ObjectId, ref: 'Counter',default:null }, //required true commented for now
+  counter: { type: mongoose.Schema.Types.ObjectId, ref: 'Counter',default:null }, 
 });
 
 const Dish = mongoose.model('Dish', dishSchema);
