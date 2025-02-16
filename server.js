@@ -7,22 +7,26 @@ const dishRoutes = require('./routes/dishRoutes');
 const userRoutes = require('./routes/userRoutes');
 const counterRoutes = require('./routes/counterRoutes');
 const cartRoutes = require('./routes/cartRoutes');
+const authRoutes = require('./routes/authRoutes');
 require('./config/db');
 const app = express();
 const PORT = process.env.PORT || 8080;
+const verifyToken = require("./middleware/authMiddleware")
 
 const corsOptions = {
-  origin: 'http://localhost:5173', 
-  credentials: true, 
-  allowedHeaders: ['Content-Type', 'Authorization'], 
+  origin: 'http://localhost:5173',
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
-app.use('/dishes',dishRoutes);
-app.use('/users',userRoutes);
-app.use('/counters',counterRoutes);
-app.use('/cart',cartRoutes);
+app.use('/auth', authRoutes)
+app.use('/dishes', verifyToken, dishRoutes);
+app.use('/users', verifyToken, userRoutes);
+app.use('/counters', verifyToken, counterRoutes);
+app.use('/cart', verifyToken, cartRoutes);
+app.use('/api', verifyToken, userRoutes);
 
 
 app.listen(PORT, () => {

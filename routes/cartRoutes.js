@@ -1,9 +1,23 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
-const userId = '67939eb3d220c80478105ee1'; 
 
-router.use(auth);
+
+
+async function fetchUser(req, res, next) {
+  try {
+    const user = await User.findById(req.user.id).populate('cart.dish');
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+    req.user = user; 
+    next();
+  } catch (error) {
+    res.status(500).json({ message: 'Process failed', error });
+  }
+}
+
+router.use(fetchUser);
 
 
 router.get('/', async (req, res) => {
@@ -12,8 +26,8 @@ router.get('/', async (req, res) => {
       return res.status(401).json({ message: 'User not found' });
     }
 
-    const cart = req.user.cart; 
-    res.status(200).json({ message:'successfully fetched',cart:req.user.cart });
+    const cart = req.user.cart;
+    res.status(200).json({ message: 'successfully fetched', cart: req.user.cart });
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch cart', error });
   }
@@ -42,8 +56,8 @@ router.post('/add', async (req, res) => {
   }
 });
 
-router.delete('/remove', async (req, res) => {
-  const { dishId } = req.body;
+router.delete('/remove/:dishId', async (req, res) => {
+  const { dishId } = req.params;
 
   try {
     if (!req.user) {
@@ -74,16 +88,16 @@ router.patch('/:dishId', async (req, res) => {
       return res.status(404).json({ message: 'Item not found in cart' });
     }
 
-    item.quantity += changeQuantity; 
+    item.quantity += changeQuantity;
     await req.user.save();
-    res.status(200).json(req.user.cart); 
+    res.status(200).json(req.user.cart);
   } catch (error) {
     res.status(500).json({ message: 'Failed to update item quantity', error });
   }
 });
 
 
-router.delete('/clear', async (req, res) => {
+router.delete('/clear/:userId', async (req, res) => {
   try {
     if (!req.user) {
       return res.status(401).json({ message: 'User not found' });
@@ -100,7 +114,7 @@ router.delete('/clear', async (req, res) => {
 
 async function auth(req, res, next) {
   try {
-    req.user = await User.findById(userId).populate('cart.dish'); 
+    req.user = await User.findById(userId).populate('cart.dish');
     if (!req.user) {
       return res.status(401).json({ message: 'User not found' });
     }
