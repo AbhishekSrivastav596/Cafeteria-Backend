@@ -112,16 +112,5 @@ router.delete('/clear/:userId', async (req, res) => {
 });
 
 
-async function auth(req, res, next) {
-  try {
-    req.user = await User.findById(userId).populate('cart.dish');
-    if (!req.user) {
-      return res.status(401).json({ message: 'User not found' });
-    }
-    next();
-  } catch (error) {
-    res.status(500).json({ message: 'Process failed', error });
-  }
-}
 
 module.exports = router;
