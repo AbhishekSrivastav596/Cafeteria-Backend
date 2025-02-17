@@ -4,10 +4,13 @@ const Counter = require('../models/counter');
 const User = require('../models/user');
 const Dish = require('../models/dish');
 const {authorizeRoles} = require('../middleware/authMiddleware');
+const verifyToken = require("../middleware/authMiddleware");
 
 
 
-router.post('/',authorizeRoles('admin'), async (req, res) => {
+
+
+router.post('/',verifyToken,authorizeRoles('admin'), async (req, res) => {
   try {
     const { name, merchants, imageUrl, description } = req.body;
     const newCounter = new Counter({ name, merchants, imageUrl, description });
@@ -44,7 +47,7 @@ router.get('/:counterId', async (req, res) => {
 
 
 
-router.put('/:counterId', authorizeRoles('merchant','admin'),async (req, res) => {
+router.put('/:counterId',verifyToken, authorizeRoles('merchant','admin'),async (req, res) => {
   try {
     const merchantId = req.user.id; 
     const counter = await Counter.findById(req.params.counterId);
@@ -70,7 +73,7 @@ router.put('/:counterId', authorizeRoles('merchant','admin'),async (req, res) =>
 });
 
 
-router.put('/:counterId/merchant/:merchantId', authorizeRoles('admin'),async (req, res) => {
+router.put('/:counterId/merchant/:merchantId', verifyToken,authorizeRoles('admin'),async (req, res) => {
   try {
     const counter = await Counter.findById(req.params.counterId);
     const merchant = await User.findById(req.params.merchantId);
@@ -92,7 +95,7 @@ router.put('/:counterId/merchant/:merchantId', authorizeRoles('admin'),async (re
 });
 
 
-router.delete('/:counterId/merchant/:merchantId',authorizeRoles('admin'), async (req, res) => {
+router.delete('/:counterId/merchant/:merchantId',verifyToken,authorizeRoles('admin'), async (req, res) => {
   try {
     const counter = await Counter.findById(req.params.counterId);
 
@@ -109,7 +112,7 @@ router.delete('/:counterId/merchant/:merchantId',authorizeRoles('admin'), async 
 });
 
 
-router.delete('/:counterId',authorizeRoles('admin'), async (req, res) => {
+router.delete('/:counterId',verifyToken,authorizeRoles('admin'), async (req, res) => {
   try {
     const counter = await Counter.findByIdAndDelete(req.params.counterId);
     await Dish.deleteMany({ counter: req.params.counterId });

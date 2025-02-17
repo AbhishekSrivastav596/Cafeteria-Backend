@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
 const Dish = require('../models/dish');
-const Counter = require('../models/counter');  
+const Counter = require('../models/counter');
+const verifyToken = require("../middleware/authMiddleware");
+
 
 router.get('/', async (req, res) => {
   try {
@@ -49,7 +51,7 @@ router.get('/customer', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/',verifyToken, async (req, res) => {
   try {
     const { name, email, role, cart } = req.body;
     const newUser = new User({ name, email, role, cart });
@@ -61,7 +63,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id',verifyToken, async (req, res) => {
   try {
     const userId = req.params.id;
     const deletedUser = await User.findByIdAndDelete(userId);

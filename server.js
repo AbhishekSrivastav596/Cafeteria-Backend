@@ -22,11 +22,10 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use('/auth', authRoutes)
-app.use('/dishes', verifyToken, dishRoutes);
-app.use('/users', verifyToken, userRoutes);
-app.use('/counters', verifyToken, counterRoutes);
+app.use('/dishes', dishRoutes);
+app.use('/users', userRoutes);
+app.use('/counters', counterRoutes);
 app.use('/cart', verifyToken, cartRoutes);
-app.use('/api', verifyToken, userRoutes);
 
 
 app.listen(PORT, () => {

@@ -4,6 +4,9 @@ const Dish = require('../models/dish');
 const Counter = require('../models/counter');
 const { authorizeRoles } = require('../middleware/authMiddleware');
 require('../models/counter');
+const verifyToken = require("../middleware/authMiddleware");
+
+
 
 router.get('/', async (req, res) => {
     try {
@@ -40,7 +43,7 @@ router.get('/counter/:counterId', async (req, res) => {
   });
   
 
-router.post('/', authorizeRoles('merchant'), async (req, res) => {
+router.post('/',verifyToken, authorizeRoles('merchant'), async (req, res) => {
     try {
         const { name, price, stock, description, counter, imageUrl } = req.body;
         const merchantId = req.user.id; 
@@ -63,7 +66,7 @@ router.post('/', authorizeRoles('merchant'), async (req, res) => {
     }
 });
 
-router.patch('/:id', authorizeRoles('merchant'), async (req, res) => {
+router.patch('/:id', verifyToken,authorizeRoles('merchant'), async (req, res) => {
     try {
         const merchantId = req.user.id;
         console.log("merhcantID: ", merchantId);
@@ -91,7 +94,7 @@ router.patch('/:id', authorizeRoles('merchant'), async (req, res) => {
     }
 });
 
-router.delete('/:id', authorizeRoles('merchant'), async (req, res) => {
+router.delete('/:id', verifyToken,authorizeRoles('merchant'), async (req, res) => {
     try {
         const merchantId = req.user.id;
         
