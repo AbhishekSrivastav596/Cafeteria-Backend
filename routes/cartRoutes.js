@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
+const { authorizeRoles }= require('../middleware/authMiddleware');
+
 
 
 
@@ -33,7 +35,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/add', async (req, res) => {
+router.post('/add', authorizeRoles('customer'),async (req, res) => {
   const { dishId, quantity } = req.body;
 
   try {
@@ -56,7 +58,7 @@ router.post('/add', async (req, res) => {
   }
 });
 
-router.delete('/remove/:dishId', async (req, res) => {
+router.delete('/remove/:dishId',authorizeRoles('customer'), async (req, res) => {
   const { dishId } = req.params;
 
   try {
@@ -74,7 +76,7 @@ router.delete('/remove/:dishId', async (req, res) => {
   }
 });
 
-router.patch('/:dishId', async (req, res) => {
+router.patch('/:dishId',authorizeRoles('customer'), async (req, res) => {
   const { changeQuantity } = req.body;
 
   try {
@@ -97,7 +99,7 @@ router.patch('/:dishId', async (req, res) => {
 });
 
 
-router.delete('/clear/:userId', async (req, res) => {
+router.delete('/clear/:userId',authorizeRoles('customer'), async (req, res) => {
   try {
     if (!req.user) {
       return res.status(401).json({ message: 'User not found' });
@@ -110,7 +112,6 @@ router.delete('/clear/:userId', async (req, res) => {
     res.status(500).json({ message: 'Failed to clear cart', error });
   }
 });
-
 
 
 module.exports = router;

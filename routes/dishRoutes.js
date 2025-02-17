@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Dish = require('../models/dish');
+const Counter = require('../models/counter');
+const { authorizeRoles } = require('../middleware/authMiddleware');
 require('../models/counter');
 
 router.get('/', async (req, res) => {
@@ -38,9 +40,21 @@ router.get('/counter/:counterId', async (req, res) => {
   });
   
 
-router.post('/', async (req, res) => {
+router.post('/', authorizeRoles('merchant'), async (req, res) => {
     try {
         const { name, price, stock, description, counter, imageUrl } = req.body;
+        const merchantId = req.user.id; 
+
+        const counterData = await Counter.findById(counter);
+
+        if (!counterData) {
+            return res.status(404).json({ message: "Counter not found" });
+        }
+
+        if (!counterData.merchants.includes(merchantId)) {
+            return res.status(403).json({ message: "Unauthorized to add dishes to this counter" });
+        }
+
         const newDish = new Dish({ name, price, stock, description, counter, imageUrl });
         await newDish.save();
         res.status(201).json({message:'New dish created successfully',newDish});
@@ -49,28 +63,49 @@ router.post('/', async (req, res) => {
     }
 });
 
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', authorizeRoles('merchant'), async (req, res) => {
     try {
+        const merchantId = req.user.id;
+        console.log("merhcantID: ", merchantId);
+        const dish = await Dish.findById(req.params.id);
+        
+        if (!dish) {
+            return res.status(404).json({ message: 'Dish not found' });
+        }
+
+        const counterData = await Counter.findById(dish.counter);
+        console.log("counterData: ",counterData);
+        
+        if (!counterData.merchants.includes(merchantId)) {
+            return res.status(403).json({ message: "Unauthorized to update this dish" });
+        }
+
         const updatedDish = await Dish.findByIdAndUpdate(
             req.params.id,
             req.body,
             { new: true, runValidators: true }
         );
-        if (!updatedDish) {
-            return res.status(404).json({ message: 'Dish not found' });
-        }
         res.status(200).json({message:'Dish updated successfully',updatedDish});
     } catch (error) {
         res.status(400).json({ message: 'Failed to update dish', error });
     }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authorizeRoles('merchant'), async (req, res) => {
     try {
-        const deletedDish = await Dish.findByIdAndDelete(req.params.id);
-        if (!deletedDish) {
+        const merchantId = req.user.id;
+        
+        const dish = await Dish.findById(req.params.id);
+
+        if (!dish) {
             return res.status(404).json({ message: 'Dish not found' });
         }
+
+        const counterData = await Counter.findById(dish.counter);
+        if (!counterData.merchants.includes(merchantId)) {
+            return res.status(403).json({ message: "Unauthorized to delete this dish" });
+        }
+        await Dish.findByIdAndDelete(req.params.id);
         res.status(200).json({ message: 'Dish deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Failed to delete dish', error });

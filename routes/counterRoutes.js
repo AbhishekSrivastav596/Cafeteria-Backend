@@ -3,10 +3,11 @@ const router = express.Router();
 const Counter = require('../models/counter');
 const User = require('../models/user');
 const Dish = require('../models/dish');
+const {authorizeRoles} = require('../middleware/authMiddleware');
 
 
 
-router.post('/', async (req, res) => {
+router.post('/',authorizeRoles('admin'), async (req, res) => {
   try {
     const { name, merchants, imageUrl, description } = req.body;
     const newCounter = new Counter({ name, merchants, imageUrl, description });
@@ -43,18 +44,24 @@ router.get('/:counterId', async (req, res) => {
 
 
 
-router.put('/:counterId', async (req, res) => {
+router.put('/:counterId', authorizeRoles('merchant','admin'),async (req, res) => {
   try {
+    const merchantId = req.user.id; 
+    const counter = await Counter.findById(req.params.counterId);
+
+    if (!counter) {
+      return res.status(404).json({ message: "Counter not found" });
+    }
+
+    if (req.user.role === 'merchant' && !counter.merchants.some(m => m.toString() === merchantId)) {
+      return res.status(403).json({ message: "Unauthorized to update this counter" });
+    }
     const { name, merchants, imageUrl, description } = req.body;
     const updatedCounter = await Counter.findByIdAndUpdate(
       req.params.counterId,
       { name, merchants, imageUrl, description},
       { new: true }
     ).populate('merchants');
-
-    if (!updatedCounter) {
-      return res.status(404).json({ message: "Counter not found" });
-    }
 
     res.status(200).json({ message: "Counter updated", counter: updatedCounter });
   } catch (err) {
@@ -63,7 +70,7 @@ router.put('/:counterId', async (req, res) => {
 });
 
 
-router.put('/:counterId/merchant/:merchantId', async (req, res) => {
+router.put('/:counterId/merchant/:merchantId', authorizeRoles('admin'),async (req, res) => {
   try {
     const counter = await Counter.findById(req.params.counterId);
     const merchant = await User.findById(req.params.merchantId);
@@ -85,7 +92,7 @@ router.put('/:counterId/merchant/:merchantId', async (req, res) => {
 });
 
 
-router.delete('/:counterId/merchant/:merchantId', async (req, res) => {
+router.delete('/:counterId/merchant/:merchantId',authorizeRoles('admin'), async (req, res) => {
   try {
     const counter = await Counter.findById(req.params.counterId);
 
@@ -93,10 +100,7 @@ router.delete('/:counterId/merchant/:merchantId', async (req, res) => {
       return res.status(404).json({ message: "Counter not found" });
     }
 
-    counter.merchants = counter.merchants.filter(
-      (merchantId) => !merchantId.equals(req.params.merchantId)
-    );
-
+    counter.merchants = counter.merchants.filter((merchantId) => !merchantId.equals(req.params.merchantId));
     await counter.save();
     res.status(200).json({ message: "Merchant removed from counter", counter });
   } catch (err) {
@@ -105,7 +109,7 @@ router.delete('/:counterId/merchant/:merchantId', async (req, res) => {
 });
 
 
-router.delete('/:counterId', async (req, res) => {
+router.delete('/:counterId',authorizeRoles('admin'), async (req, res) => {
   try {
     const counter = await Counter.findByIdAndDelete(req.params.counterId);
     await Dish.deleteMany({ counter: req.params.counterId });
