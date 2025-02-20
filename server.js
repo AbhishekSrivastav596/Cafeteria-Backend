@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 8080;
 const verifyToken = require("./middleware/authMiddleware")
 
 const corsOptions = {
-  origin: 'https://cafeteria-frontend-nu.vercel.app/',
+  origin: 'https://cafeteria-frontend-nu.vercel.app',
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
